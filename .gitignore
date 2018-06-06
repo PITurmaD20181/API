@@ -1,0 +1,4 @@
+unbiometry/unbiometry/__pycache__/*
+unbiometry/db.sqlite3
+unbiometry/api/migrations/*
+unbiometry/api/__pycache__/*
