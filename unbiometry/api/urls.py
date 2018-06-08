@@ -23,5 +23,10 @@ urlpatterns = [
         'classes/<int:class_id>',
         views.ClassDetailView.as_view(),
         name='class_detail'
+    ),
+    path(
+        'students/',
+        views.StudentView.as_view(),
+        name='students'
     )
 ]
