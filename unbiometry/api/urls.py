@@ -1,9 +1,15 @@
-from rest_framework import routers
-from .views import DisciplineViewSet, ClassViewSet, StudentViewSet
+from django.urls import path, include
+from .views import DisciplineView, ClassView, StudentView
 
-ROUTER = routers.DefaultRouter()
-ROUTER.register(r'^discipline', DisciplineViewSet)
-ROUTER.register(r'^class', ClassViewSet)
-ROUTER.register(r'^student', StudentViewSet)
+app_name = 'api'
 
-urlpatterns = ROUTER.urls
+urlpatterns = [
+    path(
+        'disciplines/',
+        DisciplineView.as_view(),
+    ),
+    path(
+        'disciplines/<int:discipline_id>/classes/',
+        ClassView.as_view(),
+    )
+]
