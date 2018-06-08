@@ -1,15 +1,27 @@
 from django.urls import path, include
-from .views import DisciplineView, ClassView, StudentView
+from . import views
 
 app_name = 'api'
 
 urlpatterns = [
     path(
         'disciplines/',
-        DisciplineView.as_view(),
+        views.DisciplineView.as_view(),
+        name='disciplines'
+    ),
+    path(
+        'disciplines/<int:discipline_id>',
+        views.DisciplineDetailView.as_view(),
+        name='discipline_detail'
     ),
     path(
         'disciplines/<int:discipline_id>/classes/',
-        ClassView.as_view(),
+        views.ClassView.as_view(),
+        name='classes'
+    ),
+    path(
+        'classes/<int:class_id>',
+        views.ClassDetailView.as_view(),
+        name='class_detail'
     )
 ]
