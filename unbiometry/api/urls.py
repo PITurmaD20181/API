@@ -45,11 +45,11 @@ classes_urls = [
         views.ClassDetailView.as_view(),
         name='class_detail'
     ),
-    # path(
-    #     '<int:class_id>/students/',
-    #     views.StudentsOfClassView.as_view(),
-    #     name='students_of_class'
-    # )
+    path(
+        '<int:class_id>/students/',
+        views.StudentsOfClassView.as_view(),
+        name = 'students_of_class'
+    )
 ]
 
 frequency_lists_urls = [
@@ -65,5 +65,5 @@ urlpatterns = [
     path('students/',include(students_urls)),
     path('disciplines/', include(disciplines_urls)),
     path('classes/', include(classes_urls)),
-    path('frequency_lists/', include(frequency_lists_urls))
+    path('frequency_lists/', include(frequency_lists_urls)),
 ]

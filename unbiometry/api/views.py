@@ -101,32 +101,33 @@ class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         return class_object
 
-# class StudentsOfClassView(generics.ListAPIView):
+class StudentsOfClassView(generics.ListAPIView):
 
-#     serializer_class = Student
+    serializer_class = StudentSerializer
 
-#     def get_class(self):
-#         class_id = self.kwargs['class_id']
+    def get_class(self):
 
-#         try:
-#             classe = Class.objects.get(pk=class_id)
-#         except:
-#             classe = None
-
-#         return classe
-
-#     def get_queryset(self):
-
-#         classe = self.get_class()
-#         students = []
-
-#         if classe:
-#             relations = FrequencyList.objects.filter(classe=classe)
-
-#             for relation in relations:
-#                 students.append(relation.student)
+        class_id = self.kwargs['class_id']
         
-#         return students
+        try:
+            classe = Class.objects.get(pk=class_id)
+        except:
+            classe = None
+        
+        return classe
+
+    def get_queryset(self):
+
+        students = []
+        classe = self.get_class()
+
+        if classe:
+            relations = FrequencyList.objects.filter(classe=classe)
+
+            for relation in relations:
+                students.append(relation.student)
+        
+        return students
 
 
 class FrequencyListView(generics.ListAPIView):
