@@ -30,6 +30,6 @@ class Presence(models.Model):
 
 class FrequencyList(models.Model):
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='frequency_list')
-    classe = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='frequency_list')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='frequency_lists')
+    classe = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='students')
     presences = models.ManyToManyField(Presence)

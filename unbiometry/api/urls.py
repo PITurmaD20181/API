@@ -3,30 +3,67 @@ from . import views
 
 app_name = 'api'
 
-urlpatterns = [
+students_urls = [
     path(
-        'disciplines/',
+        '',
+        views.StudentView.as_view(),
+        name='students'
+    ),
+    path(
+        '<int:student_id>/',
+        views.StudentDetailView.as_view(),
+        name='student_detail'
+    ),
+    path(
+        '<int:student_id>/frequency_lists/',
+        views.FrequencyListView.as_view(),
+        name='frequency_lists'
+    ),
+]
+
+disciplines_urls = [
+    path(
+        '',
         views.DisciplineView.as_view(),
         name='disciplines'
     ),
     path(
-        'disciplines/<int:discipline_id>',
+        '<int:discipline_id>/',
         views.DisciplineDetailView.as_view(),
         name='discipline_detail'
     ),
     path(
-        'disciplines/<int:discipline_id>/classes/',
+        '<int:discipline_id>/classes/',
         views.ClassView.as_view(),
         name='classes'
     ),
+]
+
+classes_urls = [
     path(
-        'classes/<int:class_id>',
+        '<int:class_id>/',
         views.ClassDetailView.as_view(),
         name='class_detail'
     ),
+    # path(
+    #     '<int:class_id>/students/',
+    #     views.StudentsOfClassView.as_view(),
+    #     name='students_of_class'
+    # )
+]
+
+frequency_lists_urls = [
     path(
-        'students/',
-        views.StudentView.as_view(),
-        name='students'
+        '<int:frequency_list_id>/',
+        views.FrequencyListDetailView.as_view(),
+        name='frequency_list_detail'
     )
+]
+
+
+urlpatterns = [
+    path('students/',include(students_urls)),
+    path('disciplines/', include(disciplines_urls)),
+    path('classes/', include(classes_urls)),
+    path('frequency_lists/', include(frequency_lists_urls))
 ]

@@ -1,6 +1,31 @@
 from rest_framework import generics
-from .models import Discipline, Class, Student
-from .serializers import DisciplineSerializer, ClassSerializer, StudentSerializer
+from .models import Discipline, Class, Student, FrequencyList
+from .serializers import (DisciplineSerializer, 
+                          ClassSerializer, 
+                          StudentSerializer, 
+                          FrequencyListSerializer)
+
+
+class StudentView(generics.ListCreateAPIView):
+
+    serializer_class = StudentSerializer
+    queryset = Student.objects.all()
+
+
+class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+    serializer_class = StudentSerializer
+
+    def get_object(self):
+
+        student_id = self.kwargs['student_id']
+
+        try:
+            student_object = Student.objects.get(pk=student_id)
+        except:
+            student_object = None
+
+        return student_object
 
 
 class DisciplineView(generics.ListCreateAPIView):
@@ -33,14 +58,22 @@ class ClassView(generics.ListCreateAPIView):
     def get_discipline(self):
         
         discipline_id = self.kwargs['discipline_id']
-        discipline = Discipline.objects.get(pk=discipline_id)
+        
+        try:
+            discipline = Discipline.objects.get(pk=discipline_id)
+        except:
+            discipline = None
 
         return discipline
 
     # Getting list of classses
     def get_queryset(self):
         
-        classes = Class.objects.filter(discipline=self.get_discipline())
+        discipline = self.get_discipline()
+        classes = []
+
+        if discipline:
+            classes = Class.objects.filter(discipline=discipline)
 
         return classes
 
@@ -68,8 +101,70 @@ class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         return class_object
 
+# class StudentsOfClassView(generics.ListAPIView):
 
-class StudentView(generics.ListCreateAPIView):
+#     serializer_class = Student
 
-    serializer_class = StudentSerializer
-    queryset = Student.objects.all()
+#     def get_class(self):
+#         class_id = self.kwargs['class_id']
+
+#         try:
+#             classe = Class.objects.get(pk=class_id)
+#         except:
+#             classe = None
+
+#         return classe
+
+#     def get_queryset(self):
+
+#         classe = self.get_class()
+#         students = []
+
+#         if classe:
+#             relations = FrequencyList.objects.filter(classe=classe)
+
+#             for relation in relations:
+#                 students.append(relation.student)
+        
+#         return students
+
+
+class FrequencyListView(generics.ListAPIView):
+
+    serializer_class = FrequencyListSerializer
+
+    def get_student(self):
+        student_id = self.kwargs['student_id']
+        
+        try:
+            student = Student.objects.get(pk=student_id)
+        except:
+            student = None
+
+        return student
+
+    def get_queryset(self):
+
+        student = self.get_student()
+        frequecy_lists = []
+
+        if student:
+            frequecy_lists = FrequencyList.objects.filter(student=student)
+
+        return frequecy_lists
+
+
+class FrequencyListDetailView(generics.RetrieveDestroyAPIView):
+
+    serializer_class = FrequencyListSerializer
+
+    def get_object(self):
+
+        frequency_list_id = self.kwargs['frequency_list_id']
+
+        try:
+            frequency_list = FrequencyList.objects.get(pk=frequency_list_id)
+        except:
+            frequency_list = None
+
+        return frequency_list

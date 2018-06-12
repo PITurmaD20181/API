@@ -1,5 +1,16 @@
 from rest_framework import serializers
-from .models import Discipline, Class, Student, Presence, FrequencyList
+from .models import (Discipline, 
+                     Class,
+                     Student,
+                     Presence,
+                     FrequencyList)
+
+
+class StudentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Student
+        fields = ['name', 'registration']
 
 
 class DisciplineSerializer(serializers.ModelSerializer):
@@ -25,13 +36,6 @@ class ClassSerializer(serializers.ModelSerializer):
         return Class.objects.create(**validated_data)
 
 
-class StudentSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Student
-        fields = ['name', 'registration']
-
-
 class PresenceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -48,3 +52,5 @@ class FrequencyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = FrequencyList
         fields = ['student', 'classe', 'presences']
+
+
