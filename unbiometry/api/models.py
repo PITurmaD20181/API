@@ -1,6 +1,12 @@
 from django.db import models
 
 
+class Student(models.Model):
+
+    name = models.CharField(max_length=100, blank=False)
+    registration = models.CharField(max_length=11, blank=False)
+
+
 class Discipline(models.Model):
 
     name = models.CharField(max_length=100, blank=False)
@@ -13,8 +19,17 @@ class Class(models.Model):
     discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
 
 
-class Student(models.Model):
+# Related classes to frequency and student/class relationship registration:
 
-    name = models.CharField(max_length=100, blank=False)
-    registration = models.CharField(max_length=11, blank=False)
-    classes = models.ManyToManyField(Class)
+
+class Presence(models.Model):
+
+    status = models.BooleanField(default=False)
+    date_time = models.DateTimeField(auto_now_add=True)
+
+
+class FrequencyList(models.Model):
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='frequency_list')
+    classe = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='frequency_list')
+    presences = models.ManyToManyField(Presence)

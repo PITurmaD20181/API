@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Discipline, Class, Student
+from .models import Discipline, Class, Student, Presence, FrequencyList
 
 
 class DisciplineSerializer(serializers.ModelSerializer):
@@ -27,8 +27,24 @@ class ClassSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
 
-    classes = ClassSerializer(many=True, read_only=True)
-
     class Meta:
         model = Student
-        fields = ['name', 'registration', 'classes']
+        fields = ['name', 'registration']
+
+
+class PresenceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Presence
+        fields = ['status', 'date_time']
+
+
+class FrequencyListSerializer(serializers.ModelSerializer):
+
+    student = StudentSerializer(read_only=True)
+    classe = ClassSerializer(read_only=True)
+    presences = PresenceSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FrequencyList
+        fields = ['student', 'classe', 'presences']
