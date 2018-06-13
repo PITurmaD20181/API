@@ -4,13 +4,13 @@ from django.db import models
 class Student(models.Model):
 
     name = models.CharField(max_length=100, blank=False)
-    registration = models.CharField(max_length=11, blank=False)
+    registration = models.CharField(max_length=9, unique=True, blank=False)
 
 
 class Discipline(models.Model):
 
     name = models.CharField(max_length=100, blank=False)
-    code = models.CharField(max_length=50, blank=False)
+    code = models.CharField(max_length=50, unique=True, blank=False)
 
 
 class Class(models.Model):

@@ -18,7 +18,7 @@ students_urls = [
         '<int:student_id>/frequency_lists/',
         views.FrequencyListView.as_view(),
         name='frequency_lists'
-    ),
+    )
 ]
 
 disciplines_urls = [
@@ -49,6 +49,11 @@ classes_urls = [
         '<int:class_id>/students/',
         views.StudentsOfClassView.as_view(),
         name = 'students_of_class'
+    ),
+    path(
+        '<int:class_id>/add_student/',
+        views.AddStudentInClassView.as_view(),
+        name='add_student_in_class'
     )
 ]
 

@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from .models import (Discipline, 
                      Class,
@@ -52,5 +53,28 @@ class FrequencyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = FrequencyList
         fields = ['student', 'classe', 'presences']
+
+    
+class CreateFrequencyListSerializer(serializers.Serializer):
+
+    student = serializers.CharField(max_length=9)
+
+    def create(self, validated_data):
+
+        student = validated_data['student']
+
+        try:
+            student_object = Student.objects.get(registration=student)
+        except:
+            raise ObjectDoesNotExist('Student not found.')
+
+        classe = self.context['class']
+        frequecy_list = FrequencyList.objects.create(student=student_object, classe=classe)
+
+        return frequecy_list
+
+
+
+
 
 

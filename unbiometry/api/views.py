@@ -3,7 +3,8 @@ from .models import Discipline, Class, Student, FrequencyList
 from .serializers import (DisciplineSerializer, 
                           ClassSerializer, 
                           StudentSerializer, 
-                          FrequencyListSerializer)
+                          FrequencyListSerializer,
+                          CreateFrequencyListSerializer)
 
 
 class StudentView(generics.ListCreateAPIView):
@@ -128,6 +129,31 @@ class StudentsOfClassView(generics.ListAPIView):
                 students.append(relation.student)
         
         return students
+
+
+class AddStudentInClassView(generics.CreateAPIView):
+    
+    serializer_class = CreateFrequencyListSerializer
+
+    def get_class(self):
+
+        class_id = self.kwargs['class_id']
+
+        try:
+            classe = Class.objects.get(pk=class_id)
+        except:
+            classe = None
+
+        return classe
+
+
+    def get_serializer_context(self):
+        
+        context = super(AddStudentInClassView, self).get_serializer_context()
+
+        context['class'] = self.get_class()
+
+        return context
 
 
 class FrequencyListView(generics.ListAPIView):
