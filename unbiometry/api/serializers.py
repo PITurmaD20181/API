@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import serializers
 from .models import (Discipline, 
                      Class,
@@ -32,8 +32,15 @@ class ClassSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         
         discipline = self.context['discipline']
-        validated_data['discipline'] = discipline
+        name = validated_data['name']
 
+        # Checking if class does not exist.
+        classes = Class.objects.filter(discipline=discipline, name=name)
+        
+        if classes:
+            raise ValidationError('Class already exists.')     
+
+        validated_data['discipline'] = discipline
         return Class.objects.create(**validated_data)
 
 
@@ -59,19 +66,31 @@ class CreateFrequencyListSerializer(serializers.Serializer):
 
     student = serializers.CharField(max_length=9)
 
-    def create(self, validated_data):
+    def get_student(self, registration, classe):
 
-        student = validated_data['student']
-
+        # Checking if student exists.
         try:
-            student_object = Student.objects.get(registration=student)
+            student = Student.objects.get(registration=registration)
         except:
             raise ObjectDoesNotExist('Student not found.')
 
-        classe = self.context['class']
-        frequecy_list = FrequencyList.objects.create(student=student_object, classe=classe)
+        # Checking if student is not already added in the class.
+        frequency_lists = FrequencyList.objects.filter(classe=classe, student=student)
 
-        return frequecy_list
+        if frequency_lists:
+            raise ValidationError('Student already added.')
+
+        return student
+
+
+    def create(self, validated_data):
+
+        registration = validated_data['student']
+        
+        classe = self.context['class']
+        student = self.get_student(registration, classe)
+
+        return FrequencyList.objects.create(student=student, classe=classe)
 
 
 
