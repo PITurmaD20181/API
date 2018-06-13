@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import serializers
+from . import constants
 from .models import (Discipline, 
                      Class,
                      Student,
@@ -98,17 +99,53 @@ class AddPresenceSerializer(serializers.Serializer):
     registration = serializers.CharField(max_length=9)
     date_time = serializers.DateTimeField()
 
-    def create(self, validated_data):
+    def get_class(self):
+
+        discipline_code = constants.PI_CODE
+        class_name = constants.CLASS_NAME
+
+        try:
+            discipline = Discipline.objects.get(code=discipline_code)
+            classe = Class.objects.get(discipline=discipline, name=class_name)
+        except:
+            raise ObjectDoesNotExist('Error trying to get discipline and class.')
+
+        return classe
+
+    def get_student(self, validated_data):
 
         registration = validated_data['registration']
-        date_time = validated_data['date_time']
 
-        print('==================================================')
-        print(registration)
-        print(date_time)
-        print('==================================================')
+        try:
+            student = Student.objects.get(registration=registration)
+        except:
+            raise ObjectDoesNotExist('Student does not exist.')
 
-        return None
+        return student
+
+    def get_frequency_list(self, validated_data):
+
+        student = self.get_student(validated_data)
+        classe = self.get_class()
+
+        try:
+            frequency_list = FrequencyList.objects.get(student=student, classe=classe)
+        except:
+            raise ObjectDoesNotExist('Student is not added in the class.\nFrequency list does not exist.')
+
+        return frequency_list
+
+    def create(self, validated_data):
+
+        frequency_list = self.get_frequency_list(validated_data)
+
+        presence = frequency_list.presences[-1]
+        presence.status = True
+        presence.date_time = validated_data['date_time']
+
+        return presence
+
+        
 
 
 
