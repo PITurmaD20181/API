@@ -62,6 +62,11 @@ frequency_lists_urls = [
         '<int:frequency_list_id>/',
         views.FrequencyListDetailView.as_view(),
         name='frequency_list_detail'
+    ),
+    path(
+        'add_presence/',
+        views.AddPresenceView.as_view(),
+        name='add_presence'
     )
 ]
 
@@ -70,5 +75,5 @@ urlpatterns = [
     path('students/',include(students_urls)),
     path('disciplines/', include(disciplines_urls)),
     path('classes/', include(classes_urls)),
-    path('frequency_lists/', include(frequency_lists_urls)),
+    path('frequency_lists/', include(frequency_lists_urls))
 ]

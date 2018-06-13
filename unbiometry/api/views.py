@@ -4,7 +4,8 @@ from .serializers import (DisciplineSerializer,
                           ClassSerializer, 
                           StudentSerializer, 
                           FrequencyListSerializer,
-                          CreateFrequencyListSerializer)
+                          CreateFrequencyListSerializer,
+                          AddPresenceSerializer)
 
 
 class StudentView(generics.ListCreateAPIView):
@@ -195,3 +196,8 @@ class FrequencyListDetailView(generics.RetrieveDestroyAPIView):
             frequency_list = None
 
         return frequency_list
+
+
+class AddPresenceView(generics.CreateAPIView):
+
+    serializer_class = AddPresenceSerializer

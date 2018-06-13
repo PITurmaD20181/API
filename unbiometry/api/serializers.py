@@ -93,6 +93,23 @@ class CreateFrequencyListSerializer(serializers.Serializer):
         return FrequencyList.objects.create(student=student, classe=classe)
 
 
+class AddPresenceSerializer(serializers.Serializer):
+
+    registration = serializers.CharField(max_length=9)
+    date_time = serializers.DateTimeField()
+
+    def create(self, validated_data):
+
+        registration = validated_data['registration']
+        date_time = validated_data['date_time']
+
+        print('==================================================')
+        print(registration)
+        print(date_time)
+        print('==================================================')
+
+        return None
+
 
 
 
