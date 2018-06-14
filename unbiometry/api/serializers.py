@@ -1,5 +1,14 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+# Standard Library
+import json
+
+# Django
+from django.core.exceptions import (ObjectDoesNotExist, 
+                                    ValidationError)
+
+# Rest Framework                                    
 from rest_framework import serializers
+
+# Application
 from . import constants
 from .models import (Discipline, 
                      Class,
@@ -28,15 +37,15 @@ class ClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Class
-        fields = ['name', 'discipline']
+        fields = ['discipline', 'classe']
 
     def create(self, validated_data):
         
         discipline = self.context['discipline']
-        name = validated_data['name']
+        classe = validated_data['classe']
 
         # Checking if class does not exist.
-        classes = Class.objects.filter(discipline=discipline, name=name)
+        classes = Class.objects.filter(discipline=discipline, classe=classe)
         
         if classes:
             raise ValidationError('Class already exists.')     
@@ -96,9 +105,11 @@ class CreateFrequencyListSerializer(serializers.Serializer):
 
 class AddPresenceSerializer(serializers.Serializer):
 
+    presence = PresenceSerializer(read_only=True)
+
     registration = serializers.CharField(max_length=9)
     date_time = serializers.DateTimeField()
-
+    
     def get_class(self):
 
         discipline_code = constants.PI_CODE
@@ -106,15 +117,13 @@ class AddPresenceSerializer(serializers.Serializer):
 
         try:
             discipline = Discipline.objects.get(code=discipline_code)
-            classe = Class.objects.get(discipline=discipline, name=class_name)
+            classe = Class.objects.get(discipline=discipline, classe=class_name)
         except:
             raise ObjectDoesNotExist('Error trying to get discipline and class.')
 
         return classe
 
-    def get_student(self, validated_data):
-
-        registration = validated_data['registration']
+    def get_student(self, registration):
 
         try:
             student = Student.objects.get(registration=registration)
@@ -123,27 +132,45 @@ class AddPresenceSerializer(serializers.Serializer):
 
         return student
 
-    def get_frequency_list(self, validated_data):
+    def get_frequency_list(self, registration):
 
-        student = self.get_student(validated_data)
+        student = self.get_student(registration)
         classe = self.get_class()
 
         try:
             frequency_list = FrequencyList.objects.get(student=student, classe=classe)
         except:
-            raise ObjectDoesNotExist('Student is not added in the class.\nFrequency list does not exist.')
+            raise ObjectDoesNotExist("""Student is not added in the class.\n
+                                        Frequency list does not exist."""
+                                    )
 
         return frequency_list
 
+    def response_presence(self, presence, registration, date_time):
+
+        data = {
+            'presence' : presence,
+            'registration' : registration,
+            'date_time' : date_time
+        }
+
+        return data
+
+
     def create(self, validated_data):
 
-        frequency_list = self.get_frequency_list(validated_data)
+        registration = validated_data['registration']
+        date_time = validated_data['date_time']
 
-        presence = frequency_list.presences[-1]
+        frequency_list = self.get_frequency_list(registration)
+
+        presence = Presence.objects.filter(frequency_list=frequency_list).last()
+        
         presence.status = True
-        presence.date_time = validated_data['date_time']
+        presence.date_time = date_time
+        presence.save()
 
-        return presence
+        return self.response_presence(presence, registration, date_time)
 
         
 

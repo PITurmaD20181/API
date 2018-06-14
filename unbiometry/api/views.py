@@ -1,6 +1,20 @@
+#Django
+from django.core import serializers
+from django.core.exceptions import (ObjectDoesNotExist, 
+                                    ValidationError)
+
+# Rest Framework
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import generics
-from .models import Discipline, Class, Student, FrequencyList
+
+# Application
+from . import constants
+from .models import (Discipline, 
+                     Class, 
+                     Student, 
+                     FrequencyList, 
+                     Presence)
 from .serializers import (DisciplineSerializer, 
                           ClassSerializer, 
                           StudentSerializer, 
@@ -197,6 +211,41 @@ class FrequencyListDetailView(generics.RetrieveDestroyAPIView):
             frequency_list = None
 
         return frequency_list
+
+
+class InitializePresencesList(APIView):
+
+    def get_classe(self):
+
+        discipline_code = constants.PI_CODE
+        class_name = constants.CLASS_NAME
+
+        try:
+            discipline = Discipline.objects.filter(code=discipline_code)[0]
+            classe = Class.objects.filter(discipline=discipline, classe=class_name)[0]
+        except:
+            raise ObjectDoesNotExist('Error trying to get discipline and class.')
+
+        return classe
+
+    def initialize_presences_list(self):
+
+        frequency_lists = FrequencyList.objects.filter(classe=self.get_classe())
+        presences = []
+
+        for frequency_list in frequency_lists:
+            presence = Presence.objects.create(frequency_list=frequency_list)
+            presences.append(presence)
+
+        return presences
+
+    def get(self, request, format=None):
+
+        presences = self.initialize_presences_list()
+
+        data = serializers.serialize("json", presences)
+
+        return Response(data)
 
 
 class AddPresenceView(generics.CreateAPIView):

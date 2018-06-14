@@ -15,21 +15,23 @@ class Discipline(models.Model):
 
 class Class(models.Model):
 
-    name = models.CharField(max_length=10, blank=False)
     discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
+    classe = models.CharField(max_length=10, blank=False)
 
 
 # Related classes to frequency and student/class relationship registration:
-
-
-class Presence(models.Model):
-
-    status = models.BooleanField(default=False)
-    date_time = models.DateTimeField(auto_now_add=True)
-
 
 class FrequencyList(models.Model):
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='frequency_lists')
     classe = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='students')
-    presences = models.ManyToManyField(Presence)
+
+
+class Presence(models.Model):
+
+    frequency_list = models.ForeignKey(FrequencyList, on_delete=models.CASCADE, related_name='presences')
+    status = models.BooleanField(default=False)
+    date_time = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return 'status: %r\ndate_time: %s' % (self.status, str(self.date_time))

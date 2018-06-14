@@ -64,6 +64,11 @@ frequency_lists_urls = [
         name='frequency_list_detail'
     ),
     path(
+        'inicialize_presences_list/',
+        views.InitializePresencesList.as_view(),
+        name='initialize_presence_list'
+    ),
+    path(
         'add_presence/',
         views.AddPresenceView.as_view(),
         name='add_presence'
