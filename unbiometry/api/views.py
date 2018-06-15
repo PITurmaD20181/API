@@ -228,6 +228,24 @@ class InitializePresencesList(APIView):
 
         return classe
 
+    
+    def update_frequency(self, frequency_list):
+
+        presences = Presence.objects.filter(frequency_list=frequency_list)
+        presences_true = [elem for elem in presences if elem.status == True]
+
+        total_presences = len(presences)
+        total_presences_true = len(presences_true)
+     
+        if total_presences_true != 0:
+            result = round(float((total_presences_true*100)/total_presences), 2)
+        else:
+            result = 0
+
+        frequency_list.frequency = result
+        frequency_list.save()
+
+
     def initialize_presences_list(self):
 
         frequency_lists = FrequencyList.objects.filter(classe=self.get_classe())
@@ -236,6 +254,7 @@ class InitializePresencesList(APIView):
         for frequency_list in frequency_lists:
             presence = Presence.objects.create(frequency_list=frequency_list)
             presences.append(presence)
+            self.update_frequency(frequency_list)
 
         return presences
 

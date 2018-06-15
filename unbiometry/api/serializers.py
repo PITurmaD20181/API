@@ -69,7 +69,7 @@ class FrequencyListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FrequencyList
-        fields = ['student', 'classe', 'presences']
+        fields = ['student', 'classe', 'presences', 'frequency']
 
     
 class CreateFrequencyListSerializer(serializers.Serializer):
@@ -146,6 +146,22 @@ class AddPresenceSerializer(serializers.Serializer):
 
         return frequency_list
 
+    def update_frequency(self, frequency_list):
+
+        presences = Presence.objects.filter(frequency_list=frequency_list)
+        presences_true = [elem for elem in presences if elem.status == True]
+
+        total_presences = len(presences)
+        total_presences_true = len(presences_true)
+     
+        if total_presences_true != 0:
+            result = round(float((total_presences_true*100)/total_presences), 2)
+        else:
+            result = 0
+
+        frequency_list.frequency = result
+        frequency_list.save()
+
     def response_presence(self, presence, registration, date_time):
 
         data = {
@@ -169,6 +185,8 @@ class AddPresenceSerializer(serializers.Serializer):
         presence.status = True
         presence.date_time = date_time
         presence.save()
+
+        self.update_frequency(frequency_list)
 
         return self.response_presence(presence, registration, date_time)
 

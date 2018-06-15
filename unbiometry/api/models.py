@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 
 class Student(models.Model):
@@ -25,6 +26,7 @@ class FrequencyList(models.Model):
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='frequency_lists')
     classe = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='students')
+    frequency = models.FloatField(validators=[MinValueValidator(0)], default=0)
 
 
 class Presence(models.Model):
@@ -32,6 +34,3 @@ class Presence(models.Model):
     frequency_list = models.ForeignKey(FrequencyList, on_delete=models.CASCADE, related_name='presences')
     status = models.BooleanField(default=False)
     date_time = models.DateTimeField(auto_now_add=True)
-
-    def __unicode__(self):
-        return 'status: %r\ndate_time: %s' % (self.status, str(self.date_time))
