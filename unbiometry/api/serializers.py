@@ -12,9 +12,17 @@ from rest_framework import serializers
 from . import constants
 from .models import (Discipline, 
                      Class,
+                     Teacher,
                      Student,
                      Presence,
                      FrequencyList)
+
+
+class TeacherSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teacher
+        fields = ['name', 'email']
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -34,10 +42,24 @@ class DisciplineSerializer(serializers.ModelSerializer):
 class ClassSerializer(serializers.ModelSerializer):
 
     discipline = DisciplineSerializer(read_only=True)
+    teacher = TeacherSerializer(read_only=True)
+
+    teacher_email = serializers.EmailField(max_length=100, write_only=True)
 
     class Meta:
         model = Class
-        fields = ['discipline', 'classe']
+        fields = ['discipline', 'classe', 'teacher', 'teacher_email']
+
+    def get_teacher(self, validated_data):
+
+        teacher_email = validated_data['teacher_email']
+
+        try:
+            teacher = Teacher.objects.filter(email=teacher_email)[0]
+        except:
+            raise ObjectDoesNotExist('Teacher does not exist.')
+
+        return teacher
 
     def create(self, validated_data):
         
@@ -48,10 +70,13 @@ class ClassSerializer(serializers.ModelSerializer):
         classes = Class.objects.filter(discipline=discipline, classe=classe)
         
         if classes:
-            raise ValidationError('Class already exists.')     
+            raise ValidationError('Class already exists.')
 
-        validated_data['discipline'] = discipline
-        return Class.objects.create(**validated_data)
+        teacher = self.get_teacher(validated_data)
+
+        return Class.objects.create(discipline=discipline,
+                                    classe=classe,
+                                    teacher=teacher)
 
 
 class PresenceSerializer(serializers.ModelSerializer):
@@ -69,7 +94,7 @@ class FrequencyListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FrequencyList
-        fields = ['student', 'classe', 'presences', 'frequency']
+        fields = ['student', 'classe', 'frequency', 'presences']
 
     
 class CreateFrequencyListSerializer(serializers.Serializer):
@@ -107,8 +132,8 @@ class AddPresenceSerializer(serializers.Serializer):
 
     presence = PresenceSerializer(read_only=True)
 
-    registration = serializers.CharField(max_length=9)
-    date_time = serializers.DateTimeField()
+    registration = serializers.CharField(max_length=9, write_only=True)
+    date_time = serializers.DateTimeField(write_only=True)
     
     def get_class(self):
 
@@ -162,17 +187,6 @@ class AddPresenceSerializer(serializers.Serializer):
         frequency_list.frequency = result
         frequency_list.save()
 
-    def response_presence(self, presence, registration, date_time):
-
-        data = {
-            'presence' : presence,
-            'registration' : registration,
-            'date_time' : date_time
-        }
-
-        return data
-
-
     def create(self, validated_data):
 
         registration = validated_data['registration']
@@ -188,7 +202,7 @@ class AddPresenceSerializer(serializers.Serializer):
 
         self.update_frequency(frequency_list)
 
-        return self.response_presence(presence, registration, date_time)
+        return presence
 
         
 

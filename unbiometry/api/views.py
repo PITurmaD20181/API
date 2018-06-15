@@ -1,4 +1,4 @@
-#Django
+# Django
 from django.core import serializers
 from django.core.exceptions import (ObjectDoesNotExist, 
                                     ValidationError)
@@ -11,16 +11,81 @@ from rest_framework import generics
 # Application
 from . import constants
 from .models import (Discipline, 
-                     Class, 
+                     Class,
+                     Teacher,
                      Student, 
                      FrequencyList, 
                      Presence)
 from .serializers import (DisciplineSerializer, 
-                          ClassSerializer, 
+                          ClassSerializer,
+                          TeacherSerializer, 
                           StudentSerializer, 
                           FrequencyListSerializer,
                           CreateFrequencyListSerializer,
                           AddPresenceSerializer)
+
+
+class TeacherView(generics.ListCreateAPIView):
+
+    serializer_class = TeacherSerializer
+    queryset = Teacher.objects.all()
+
+
+class TeacherFrequencyListsView(APIView):
+
+    def get_teacher(self):
+        teacher_id = self.kwargs['teacher_id']
+        
+        try:
+            teacher = Teacher.objects.get(pk=teacher_id)
+        except:
+            teacher = None
+
+        return teacher
+
+    def get_classes(self):
+
+        teacher = self.get_teacher()
+        classes = Class.objects.filter(teacher=teacher)
+
+        return classes
+
+    def build_presences_list(self, frequency_list):
+
+        presences_list = []
+
+        for elem in frequency_list:
+
+            presences = Presence.objects.filter(frequency_list=elem).values('status', 'date_time')
+
+            elem_data = {
+                'student_name' : elem.student.name,
+                'student_registration' : elem.student.registration,
+                'frequency' : elem.frequency,
+                'presences' : presences
+            }
+
+            presences_list.append(elem_data)
+        
+        return presences_list
+
+    def get(self, request, *args, **kwargs):
+
+        frequecy_lists = []
+
+        classes = self.get_classes()
+
+        for classe in classes:
+            frequency_list = FrequencyList.objects.filter(classe=classe)
+            frequecy_lists.append(
+                {
+                    'discipline_name' : classe.discipline.name,
+                    'discipline_code' : classe.discipline.code,
+                    'classe' : classe.classe,
+                    'presences_list' : self.build_presences_list(frequency_list)
+                })
+
+        return Response(frequecy_lists)
 
 
 class StudentView(generics.ListCreateAPIView):
@@ -29,42 +94,35 @@ class StudentView(generics.ListCreateAPIView):
     queryset = Student.objects.all()
 
 
-class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
+class StudentFrequencyListsView(generics.ListAPIView):
 
-    serializer_class = StudentSerializer
+    serializer_class = FrequencyListSerializer
 
-    def get_object(self):
-
+    def get_student(self):
         student_id = self.kwargs['student_id']
-
+        
         try:
-            student_object = Student.objects.get(pk=student_id)
+            student = Student.objects.get(pk=student_id)
         except:
-            student_object = None
+            student = None
 
-        return student_object
+        return student
+
+    def get_queryset(self):
+
+        student = self.get_student()
+        frequecy_lists = []
+
+        if student:
+            frequecy_lists = FrequencyList.objects.filter(student=student)
+
+        return frequecy_lists
 
 
 class DisciplineView(generics.ListCreateAPIView):
 
     serializer_class = DisciplineSerializer
     queryset = Discipline.objects.all()
-
-
-class DisciplineDetailView(generics.RetrieveUpdateDestroyAPIView):
-
-    serializer_class = DisciplineSerializer
-
-    def get_object(self):
-        
-        discipline_id = self.kwargs['discipline_id']
-
-        try:
-            discipline = Discipline.objects.get(pk=discipline_id)
-        except:
-            discipline = None
-
-        return discipline
 
 
 class ClassView(generics.ListCreateAPIView):
@@ -102,21 +160,6 @@ class ClassView(generics.ListCreateAPIView):
 
         return context
 
-
-class ClassDetailView(generics.RetrieveUpdateDestroyAPIView):
-
-    serializer_class = ClassSerializer
-
-    def get_object(self):
-
-        class_id = self.kwargs['class_id']
-
-        try:
-            class_object = Class.objects.get(pk=class_id)
-        except:
-            class_object = None
-
-        return class_object
 
 class StudentsOfClassView(generics.ListAPIView):
 
@@ -170,47 +213,6 @@ class AddStudentInClassView(generics.CreateAPIView):
         context['class'] = self.get_class()
 
         return context
-
-
-class FrequencyListView(generics.ListAPIView):
-
-    serializer_class = FrequencyListSerializer
-
-    def get_student(self):
-        student_id = self.kwargs['student_id']
-        
-        try:
-            student = Student.objects.get(pk=student_id)
-        except:
-            student = None
-
-        return student
-
-    def get_queryset(self):
-
-        student = self.get_student()
-        frequecy_lists = []
-
-        if student:
-            frequecy_lists = FrequencyList.objects.filter(student=student)
-
-        return frequecy_lists
-
-
-class FrequencyListDetailView(generics.RetrieveDestroyAPIView):
-
-    serializer_class = FrequencyListSerializer
-
-    def get_object(self):
-
-        frequency_list_id = self.kwargs['frequency_list_id']
-
-        try:
-            frequency_list = FrequencyList.objects.get(pk=frequency_list_id)
-        except:
-            frequency_list = None
-
-        return frequency_list
 
 
 class InitializePresencesList(APIView):

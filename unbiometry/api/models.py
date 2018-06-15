@@ -2,6 +2,12 @@ from django.db import models
 from django.core.validators import MinValueValidator
 
 
+class Teacher(models.Model):
+
+    name = models.CharField(max_length=100, blank=False)
+    email = models.EmailField(max_length=100, blank=False, unique=True)
+
+
 class Student(models.Model):
 
     name = models.CharField(max_length=100, blank=False)
@@ -18,6 +24,7 @@ class Class(models.Model):
 
     discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
     classe = models.CharField(max_length=10, blank=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
 
 
 # Related classes to frequency and student/class relationship registration:

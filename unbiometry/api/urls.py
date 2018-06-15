@@ -3,6 +3,20 @@ from . import views
 
 app_name = 'api'
 
+
+teacher_urls = [
+    path(
+        '',
+        views.TeacherView.as_view(),
+        name='teachers'
+    ),
+    path(
+        '<int:teacher_id>/frequency_lists',
+        views.TeacherFrequencyListsView.as_view(),
+        name='teacher_frequency_lists'
+    )
+]
+
 students_urls = [
     path(
         '',
@@ -10,14 +24,9 @@ students_urls = [
         name='students'
     ),
     path(
-        '<int:student_id>/',
-        views.StudentDetailView.as_view(),
-        name='student_detail'
-    ),
-    path(
         '<int:student_id>/frequency_lists/',
-        views.FrequencyListView.as_view(),
-        name='frequency_lists'
+        views.StudentFrequencyListsView.as_view(),
+        name='student_frequency_lists'
     )
 ]
 
@@ -28,11 +37,6 @@ disciplines_urls = [
         name='disciplines'
     ),
     path(
-        '<int:discipline_id>/',
-        views.DisciplineDetailView.as_view(),
-        name='discipline_detail'
-    ),
-    path(
         '<int:discipline_id>/classes/',
         views.ClassView.as_view(),
         name='classes'
@@ -40,11 +44,6 @@ disciplines_urls = [
 ]
 
 classes_urls = [
-    path(
-        '<int:class_id>/',
-        views.ClassDetailView.as_view(),
-        name='class_detail'
-    ),
     path(
         '<int:class_id>/students/',
         views.StudentsOfClassView.as_view(),
@@ -59,11 +58,6 @@ classes_urls = [
 
 frequency_lists_urls = [
     path(
-        '<int:frequency_list_id>/',
-        views.FrequencyListDetailView.as_view(),
-        name='frequency_list_detail'
-    ),
-    path(
         'inicialize_presences_list/',
         views.InitializePresencesList.as_view(),
         name='initialize_presence_list'
@@ -77,6 +71,7 @@ frequency_lists_urls = [
 
 
 urlpatterns = [
+    path('teachers/', include(teacher_urls)),
     path('students/',include(students_urls)),
     path('disciplines/', include(disciplines_urls)),
     path('classes/', include(classes_urls)),
